@@ -9,6 +9,7 @@ import { PlatformView } from '@/pages/PlatformView'
 import { CampaignDrillDown } from '@/pages/CampaignDrillDown'
 import { Funnel } from '@/pages/Funnel'
 import { Settings } from '@/pages/Settings'
+import { ProjectsHub } from '@/pages/ProjectsHub'
 import { supabaseMisconfigured } from '@/lib/supabase'
 
 const queryClient = new QueryClient({
@@ -53,6 +54,9 @@ const router = createBrowserRouter([
       </Providers>
     ),
     children: [
+      // Projects Hub is a standalone full-page view (its own RTL topbar), so it
+      // lives outside the Ads Hub Layout/sidebar.
+      { path: 'projects', element: <ProjectsHub /> },
       {
         element: <Layout />,
         children: [

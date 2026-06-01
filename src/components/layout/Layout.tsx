@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { to: '/dashboard/platform/tiktok',   label: 'TikTok',   end: false, color: '#FE2C55' },
   { to: '/dashboard/platform/linkedin', label: 'LinkedIn', end: false, color: '#0A66C2' },
   { to: '/dashboard/funnel',            label: 'Funnel',   end: false, color: null },
+  { to: '/projects',                    label: 'Projects', end: false, color: '#3949c8' },
 ]
 
 function NavItem({ to, label, end = false, color }: { to: string; label: string; end?: boolean; color: string | null }) {
