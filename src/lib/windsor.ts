@@ -7,13 +7,14 @@ export interface WindsorRow {
   spend: number
   impressions: number
   conversions: number
+  leads: number
   revenue: number
 }
 
 // Fields that are confirmed to exist in Windsor.ai Google Ads connector.
 // Optional metric fields (impressions, conversions, revenue) are requested
 // but default to 0 if Windsor.ai doesn't return them.
-const FIELDS = 'date,datasource,source,account_name,campaign,clicks,spend,impressions,conversions,revenue'
+const FIELDS = 'date,datasource,source,account_name,campaign,clicks,spend,impressions,conversions,leads,revenue'
 
 export function normalizePlatform(datasource: string, source?: string): string {
   // Windsor.ai uses both "datasource" and "source" — try both
@@ -61,6 +62,7 @@ export async function fetchWindsor(dateFrom: string, dateTo: string): Promise<Wi
     spend: Number(row.spend ?? 0),
     impressions: Number(row.impressions ?? 0),
     conversions: Number(row.conversions ?? 0),
+    leads: Number(row.leads ?? 0),
     revenue: Number(row.revenue ?? 0),
   }))
 }
@@ -72,8 +74,9 @@ export function sumMetrics(rows: WindsorRow[]) {
       clicks: acc.clicks + r.clicks,
       impressions: acc.impressions + r.impressions,
       conversions: acc.conversions + r.conversions,
+      leads: acc.leads + r.leads,
       revenue: acc.revenue + r.revenue,
     }),
-    { spend: 0, clicks: 0, impressions: 0, conversions: 0, revenue: 0 }
+    { spend: 0, clicks: 0, impressions: 0, conversions: 0, leads: 0, revenue: 0 }
   )
 }

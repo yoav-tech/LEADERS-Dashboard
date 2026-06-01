@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { fetchWindsor } from '@/lib/windsor'
 import type { DateRange } from '@/contexts/FiltersContext'
+import type { AdSetRow, AdRow } from '@/types/database'
 
 function fmt(d: Date) { return format(d, 'yyyy-MM-dd') }
 
@@ -83,7 +84,7 @@ export function useCampaignHierarchy(campaignId: string | undefined, dateRange: 
           platform,
           ...totals,
         },
-        adsets: [] as { adset: { adset_id: string; adset_name: string; spend: number; revenue: number; conversions: number }; ads: never[] }[],
+        adsets: [] as { adset: AdSetRow; ads: AdRow[] }[],
       }
     },
   })

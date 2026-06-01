@@ -93,6 +93,7 @@ export function useFunnelMetrics(dateRange: DateRange, _clientId: string | null,
   const data = {
     impressions: totals.impressions,
     clicks: totals.clicks,
+    leads: totals.leads,
     conversions: totals.conversions,
     spend: totals.spend,
     revenue: totals.revenue,
@@ -112,10 +113,11 @@ export function useFunnelByPlatform(dateRange: DateRange, _clientId: string | nu
 
   const filtered = filterByPlatform(rows, platforms)
 
-  const byPlatform = filtered.reduce<Record<string, { platform: string; impressions: number; clicks: number; conversions: number; spend: number; revenue: number }>>((acc, r) => {
-    if (!acc[r.datasource]) acc[r.datasource] = { platform: r.datasource, impressions: 0, clicks: 0, conversions: 0, spend: 0, revenue: 0 }
+  const byPlatform = filtered.reduce<Record<string, { platform: string; impressions: number; clicks: number; leads: number; conversions: number; spend: number; revenue: number }>>((acc, r) => {
+    if (!acc[r.datasource]) acc[r.datasource] = { platform: r.datasource, impressions: 0, clicks: 0, leads: 0, conversions: 0, spend: 0, revenue: 0 }
     acc[r.datasource].impressions += r.impressions
     acc[r.datasource].clicks += r.clicks
+    acc[r.datasource].leads += r.leads
     acc[r.datasource].conversions += r.conversions
     acc[r.datasource].spend += r.spend
     acc[r.datasource].revenue += r.revenue
