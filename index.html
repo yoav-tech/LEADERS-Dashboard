@@ -1,19 +1,795 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LEADERS Ads Hub</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LDRS · דשבורד פרויקטים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;700;900&display=swap" rel="stylesheet" />
+<style>
+/* ===== LDRS Projects Hub — new design (RTL, ClickUp-wired) ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --bg: oklch(0.984 0.004 85);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.978 0.005 85);
+  --ink: oklch(0.24 0.012 70);
+  --ink-soft: oklch(0.38 0.012 70);
+  --muted: oklch(0.56 0.01 75);
+  --faint: oklch(0.7 0.008 80);
+  --border: oklch(0.915 0.005 85);
+  --border-2: oklch(0.86 0.006 85);
+  --hover: oklch(0.965 0.006 85);
+
+  --accent: #3949c8;
+  --accent-2: #3949c8;
+  --accent-ink: oklch(0.99 0.01 264);
+  --accent-wash: #3949c81f;
+
+  --cat-revenue: oklch(0.66 0.13 70);
+  --cat-product: oklch(0.54 0.13 280);
+  --cat-people:  oklch(0.62 0.1 195);
+  --cat-ops:     oklch(0.55 0.09 245);
+  --cat-clients: oklch(0.62 0.14 18);
+
+  --st-active: oklch(0.62 0.13 150);
+  --st-plan:   oklch(0.72 0.12 80);
+  --st-block:  oklch(0.58 0.18 25);
+  --st-done:   oklch(0.56 0.11 250);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+  --card-pad: 22px;
+  --grid-gap: 20px;
+
+  --shadow-sm: 0 1px 2px oklch(0.4 0.02 70 / 0.04), 0 1px 1px oklch(0.4 0.02 70 / 0.03);
+  --shadow-md: 0 4px 16px oklch(0.4 0.02 70 / 0.06), 0 1px 3px oklch(0.4 0.02 70 / 0.05);
+  --shadow-lg: 0 18px 48px oklch(0.3 0.02 70 / 0.14), 0 4px 12px oklch(0.3 0.02 70 / 0.08);
+
+  --ff-ui: 'Assistant', system-ui, sans-serif;
+  --ff-display: 'Frank Ruhl Libre', Georgia, serif;
+}
+
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--ff-ui);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+button, input, select, textarea { font-family: inherit; }
+button { cursor: pointer; }
+::selection { background: var(--accent-wash); }
+
+/* top bar */
+.topbar {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; gap: 18px;
+  padding: 14px clamp(20px, 4vw, 48px);
+  background: oklch(1 0 0 / 0.82);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 11px;
+  background: var(--ink); color: var(--bg);
+  display: grid; place-items: center; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;
+  box-shadow: var(--shadow-sm);
+}
+.brand-name { font-weight: 800; font-size: 18px; line-height: 1; }
+.brand-sub { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 3px; }
+.topbar-spacer { flex: 1; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 8px 14px; min-width: 200px; color: var(--muted); font-size: 14px;
+}
+.search input { border: none; background: transparent; outline: none; font-size: 14px; color: var(--ink); width: 100%; }
+.icon-btn { width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--border); background: var(--surface); display: grid; place-items: center; color: var(--ink-soft); transition: background .15s, border-color .15s; }
+.icon-btn:hover { background: var(--hover); border-color: var(--border-2); }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: var(--accent-ink); border: none; border-radius: 11px; padding: 10px 16px; font-weight: 700; font-size: 14px; box-shadow: var(--shadow-sm); transition: filter .15s, transform .05s; }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border-2); color: var(--ink); border-radius: 11px; padding: 10px 16px; font-weight: 700; font-size: 14px; transition: background .15s; }
+.btn-ghost:hover { background: var(--hover); }
+.avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #fff; box-shadow: var(--shadow-sm); flex: none; }
+.clock { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 7px; }
+.clock-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--st-active); box-shadow: 0 0 0 3px oklch(0.62 0.13 150 / 0.18); }
+
+/* page */
+.page { max-width: 1340px; margin: 0 auto; padding: clamp(20px, 3vw, 38px) clamp(20px, 4vw, 48px) 90px; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 26px; }
+.page-title { font-family: var(--ff-display); font-weight: 700; font-size: clamp(30px, 4vw, 44px); line-height: 1.05; margin: 0; letter-spacing: -0.01em; }
+.page-date { color: var(--muted); font-weight: 500; margin-top: 8px; font-size: 15px; }
+.overview { display: flex; gap: 14px; flex-wrap: wrap; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; min-width: 132px; box-shadow: var(--shadow-sm); }
+.stat-num { font-size: 26px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat-num small { font-size: 14px; color: var(--muted); font-weight: 600; }
+.stat-label { color: var(--muted); font-size: 12.5px; font-weight: 600; margin-top: 7px; display: flex; align-items: center; gap: 6px; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+/* filters */
+.filters { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin-bottom: 22px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 8px 15px; font-weight: 600; font-size: 14px; color: var(--ink-soft); transition: all .15s; }
+.chip:hover { border-color: var(--border-2); background: var(--hover); }
+.chip.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.chip .count { font-size: 12px; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
+.chip.active .count { color: oklch(0.8 0 0); }
+.filters-spacer { flex: 1; }
+.view-toggle { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 11px; padding: 4px; }
+.view-toggle button { border: none; background: transparent; border-radius: 8px; padding: 6px 10px; color: var(--muted); display: grid; place-items: center; }
+.view-toggle button.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+/* section */
+.section { margin-bottom: 44px; }
+.section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.section-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.section-rule { flex: 1; height: 1px; background: var(--border); }
+
+/* hero */
+.hero { position: relative; overflow: hidden; background: radial-gradient(120% 140% at 100% 0%, var(--accent-wash) 0%, transparent 55%), var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: clamp(22px, 3vw, 34px); box-shadow: var(--shadow-md); display: grid; grid-template-columns: 1.4fr 1fr; gap: 34px; cursor: pointer; }
+.hero::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 5px; background: linear-gradient(var(--accent), var(--accent-2)); }
+.hero-eyebrow { display: flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.hero-eyebrow .ring { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--accent); display: grid; place-items: center; }
+.hero-eyebrow .ring::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.hero-title { font-family: var(--ff-display); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; margin: 14px 0 10px; letter-spacing: -0.01em; }
+.hero-desc { color: var(--ink-soft); font-size: 16px; line-height: 1.55; max-width: 46ch; margin: 0 0 22px; }
+.hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.hero-aside { display: flex; flex-direction: column; gap: 16px; justify-content: center; border-inline-start: 1px solid var(--border); padding-inline-start: 30px; }
+.hero-metric-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.hero-metric-row .k { color: var(--muted); font-size: 14px; font-weight: 600; }
+.hero-metric-row .v { font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums; }
+.avatars { display: flex; }
+.avatars .avatar { width: 32px; height: 32px; font-size: 11px; border: 2px solid var(--surface); margin-inline-start: -9px; }
+.avatars .avatar:first-child { margin-inline-start: 0; }
+.avatars .more { background: var(--surface-2); color: var(--muted); }
+
+/* progress */
+.progress { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--border); }
+.progress > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+.prog-wrap { display: flex; flex-direction: column; gap: 8px; }
+.prog-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 600; color: var(--muted); }
+.prog-label b { color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+/* grid + cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: var(--grid-gap); }
+.grid.list { grid-template-columns: 1fr; }
+.card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--card-pad); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; transition: box-shadow .18s, border-color .18s, transform .18s; cursor: pointer; }
+.card:hover { box-shadow: var(--shadow-md); border-color: var(--border-2); transform: translateY(-2px); }
+.card-cat-bar { position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px; border-start-start-radius: var(--radius); border-end-start-radius: var(--radius); }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.cat-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); }
+.cat-tag .dot { width: 9px; height: 9px; border-radius: 50%; }
+.status { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); white-space: nowrap; }
+.status .dot { width: 8px; height: 8px; border-radius: 50%; }
+.card-title { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; margin: 0; line-height: 1.2; }
+.card-meta-row { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13.5px; font-weight: 600; margin-top: 10px; }
+.card-owner { display: flex; align-items: center; gap: 9px; }
+.card-owner .avatar { width: 28px; height: 28px; font-size: 11px; }
+.card-goal { color: var(--ink-soft); font-size: 13.5px; line-height: 1.5; }
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 15px; border-top: 1px solid var(--border); margin-top: 2px; }
+.foot-item { display: flex; align-items: center; gap: 7px; color: var(--ink-soft); font-size: 13px; font-weight: 600; }
+.foot-item svg { color: var(--faint); }
+.foot-item.warn { color: var(--st-block); }
+.tasks-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; font-weight: 700; }
+.edit-btn { position: absolute; top: 12px; inset-inline-end: 14px; background: var(--surface-2); border: 1px solid var(--border); color: var(--faint); font-size: 11px; padding: 4px 9px; border-radius: 8px; opacity: 0; transition: opacity .15s; font-weight: 600; }
+.card:hover .edit-btn, .hero:hover .edit-btn { opacity: 1; }
+.edit-btn:hover { color: var(--ink); border-color: var(--border-2); }
+
+/* slide-over */
+.scrim { position: fixed; inset: 0; background: oklch(0.2 0.01 70 / 0.42); backdrop-filter: blur(2px); z-index: 60; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.scrim.open { opacity: 1; pointer-events: auto; }
+.panel { position: fixed; inset-block: 0; inset-inline-start: 0; z-index: 61; width: min(560px, 94vw); background: var(--surface); box-shadow: var(--shadow-lg); transform: translateX(103%); transition: transform .32s cubic-bezier(.4,0,.1,1); display: flex; flex-direction: column; }
+.panel.open { transform: translateX(0); }
+.panel-head { padding: 22px 24px 0; }
+.panel-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.panel-cat { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 8px; }
+.panel-cat .dot { width: 9px; height: 9px; border-radius: 50%; }
+.panel-title { font-family: var(--ff-display); font-size: 28px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.panel-sub { color: var(--muted); font-size: 14px; margin-top: 6px; font-weight: 500; }
+.panel-stats { display: flex; gap: 22px; margin: 18px 0 4px; flex-wrap: wrap; }
+.panel-stat .v { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.panel-stat .k { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+.tabs { display: flex; gap: 4px; margin-top: 20px; border-bottom: 1px solid var(--border); }
+.tab { border: none; background: transparent; padding: 12px 4px; margin-inline-end: 22px; font-weight: 700; font-size: 15px; color: var(--muted); position: relative; }
+.tab.on { color: var(--ink); }
+.tab.on::after { content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 2.5px; background: var(--accent); border-radius: 2px; }
+.tab .badge { font-size: 11px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 7px; margin-inline-start: 6px; color: var(--ink-soft); }
+.panel-body { flex: 1; overflow-y: auto; padding: 20px 24px 28px; }
+
+.task { display: flex; align-items: flex-start; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+.task:last-of-type { border-bottom: none; }
+.checkbox { width: 20px; height: 20px; border-radius: 7px; border: 2px solid var(--border-2); flex: none; margin-top: 1px; display: grid; place-items: center; color: transparent; background: var(--surface); font-size: 11px; font-weight: 800; }
+.checkbox.done { background: var(--st-active); border-color: var(--st-active); color: #fff; }
+.checkbox.wip { background: oklch(0.56 0.11 250 / 0.12); border-color: var(--st-done); color: var(--st-done); }
+.checkbox.block { background: oklch(0.58 0.18 25 / 0.12); border-color: var(--st-block); color: var(--st-block); }
+.task-main { flex: 1; }
+.task-text { font-weight: 600; font-size: 15px; line-height: 1.4; }
+.task.done .task-text { color: var(--muted); text-decoration: line-through; }
+.task-meta { display: flex; align-items: center; gap: 10px; margin-top: 6px; color: var(--muted); font-size: 12.5px; font-weight: 600; flex-wrap: wrap; }
+.task-tag { padding: 2px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
+.task-tag.late { color: var(--st-block); border-color: oklch(0.58 0.18 25 / 0.3); }
+
+.add-toggle { display: flex; align-items: center; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--border); color: var(--accent); font-weight: 700; font-size: 14px; user-select: none; }
+.add-toggle:hover { opacity: .8; }
+.task-form { display: none; margin-top: 14px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; }
+.task-form.open { display: block; }
+.form-row { display: grid; gap: 10px; margin-bottom: 12px; }
+.form-row.cols2 { grid-template-columns: 1fr 1fr; }
+.form-row.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-field label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 5px; }
+.form-input, .form-select { width: 100%; border: 1px solid var(--border-2); border-radius: 10px; padding: 9px 11px; font-size: 14px; background: var(--surface); color: var(--ink); outline: none; transition: border-color .15s; }
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.team-cbs { display: flex; flex-wrap: wrap; gap: 6px; }
+.team-cb { display: flex; align-items: center; gap: 4px; }
+.team-cb label { font-size: 12.5px; color: var(--ink-soft); }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+.update { display: flex; gap: 14px; padding: 4px 0 18px; }
+.update-line { display: flex; flex-direction: column; align-items: center; }
+.update-line .avatar { width: 34px; height: 34px; font-size: 12px; }
+.update-line .stem { flex: 1; width: 2px; background: var(--border); margin-top: 6px; }
+.update:last-child .stem { display: none; }
+.update-body { padding-top: 2px; }
+.update-body .who { font-weight: 700; font-size: 14.5px; }
+.update-body .when { color: var(--muted); font-size: 12.5px; font-weight: 600; margin-inline-start: 8px; }
+.update-bubble { color: var(--ink-soft); font-size: 14.5px; line-height: 1.5; margin-top: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px 12px 12px 12px; padding: 10px 12px; }
+.update-bubble.block { background: oklch(0.58 0.18 25 / 0.07); border-color: oklch(0.58 0.18 25 / 0.25); border-inline-start: 2px solid var(--st-block); }
+.update-bubble.good { background: oklch(0.62 0.13 150 / 0.08); border-color: oklch(0.62 0.13 150 / 0.25); border-inline-start: 2px solid var(--st-active); }
+.update-bubble.status { background: var(--accent-wash); border-inline-start: 2px solid var(--accent); }
+.update-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px; }
+.update-box textarea { width: 100%; border: 1px solid var(--border-2); border-radius: 10px; padding: 9px 11px; font-size: 14px; background: var(--surface); color: var(--ink); outline: none; resize: none; height: 70px; margin-top: 8px; }
+.update-box textarea:focus { border-color: var(--accent); }
+.update-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px; }
+
+.panel-close, .modal-close { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); display: grid; place-items: center; color: var(--ink-soft); flex: none; font-size: 16px; }
+.panel-close:hover, .modal-close:hover { background: var(--hover); }
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-state .ico { width: 54px; height: 54px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); display: grid; place-items: center; margin: 0 auto 14px; color: var(--faint); font-size: 22px; }
+.empty-state b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 5px; }
+.loading { text-align: center; color: var(--muted); padding: 32px; font-size: 14px; }
+.msg-ok { background: oklch(0.62 0.13 150 / 0.1); color: var(--st-active); border: 1px solid oklch(0.62 0.13 150 / 0.25); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 10px; }
+.msg-err { background: oklch(0.58 0.18 25 / 0.1); color: var(--st-block); border: 1px solid oklch(0.58 0.18 25 / 0.25); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 10px; }
+
+/* modal */
+.modal-bg { display: none; position: fixed; inset: 0; background: oklch(0.2 0.01 70 / 0.45); backdrop-filter: blur(3px); z-index: 80; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-title { font-family: var(--ff-display); font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); align-items: center; }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: 1fr; gap: 24px; }
+  .hero-aside { border-inline-start: none; border-top: 1px solid var(--border); padding-inline-start: 0; padding-top: 22px; }
+  .search { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">LD</div>
+      <div><div class="brand-name">LDRS</div><div class="brand-sub">הנהלה</div></div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-actions">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+        <input id="search-input" placeholder="חיפוש פרויקט…" oninput="onSearch(this.value)" />
+      </div>
+      <button class="icon-btn" title="רענון" onclick="loadAll()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      </button>
+      <span class="clock"><span class="clock-dot"></span><span id="sync-time">…</span></span>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">דשבורד פרויקטים</h1>
+        <div class="page-date" id="page-date"></div>
+      </div>
+      <div class="overview" id="overview"></div>
+    </div>
+
+    <div class="filters" id="filters"></div>
+
+    <section class="section" id="hero-section"></section>
+
+    <section class="section">
+      <div class="section-head">
+        <span class="section-eyebrow">פרויקטים אסטרטגיים</span>
+        <span id="strategic-count" style="color: var(--muted); font-size: 13px; font-weight: 600;"></span>
+        <span class="section-rule"></span>
+      </div>
+      <div class="grid" id="projects-grid"><div class="loading">טוען פרויקטים מ-ClickUp…</div></div>
+    </section>
+  </main>
+
+  <div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+  <aside class="panel" id="panel" role="dialog" aria-modal="true"></aside>
+
+  <!-- edit modal -->
+  <div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <div class="modal-title"><span id="modal-name">עריכת פרויקט</span><button class="modal-close" onclick="closeModal()">✕</button></div>
+      <input type="hidden" id="m-listid" />
+      <div class="form-row"><div class="form-field"><label>מטרת הפרויקט</label><input class="form-input" id="m-goal" placeholder="מה הפרויקט אמור להשיג?" /></div></div>
+      <div class="form-row cols2">
+        <div class="form-field"><label>קטגוריה</label><select class="form-select" id="m-dim"></select></div>
+        <div class="form-field"><label>תעדוף</label><select class="form-select" id="m-priority"><option value="">— בחר —</option><option value="P1">P1 — קריטי</option><option value="P2">P2 — חשוב</option><option value="P3">P3 — רגיל</option></select></div>
+      </div>
+      <div class="form-row cols2">
+        <div class="form-field"><label>אחריות</label><select class="form-select" id="m-owner"></select></div>
+        <div class="form-field"><label>סטטוס</label><select class="form-select" id="m-status"><option value="planning">תכנון</option><option value="on-track">פעיל</option><option value="blocked">חסום</option><option value="done">הושלם</option></select></div>
+      </div>
+      <div class="form-row cols3">
+        <div class="form-field"><label>התחלה</label><input class="form-input" id="m-start" type="date" /></div>
+        <div class="form-field"><label>יעד סיום</label><input class="form-input" id="m-due" type="date" /></div>
+        <div class="form-field"><label>מועד עדכון</label><input class="form-input" id="m-update" type="date" /></div>
+      </div>
+      <div class="modal-footer">
+        <div id="modal-msg" style="flex:1; font-size:13px;"></div>
+        <button class="btn-ghost" onclick="closeModal()">ביטול</button>
+        <button class="btn-primary" id="modal-save" onclick="saveProjectMeta()">שמור ב-ClickUp</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Config ──────────────────────────────────────────────
+const COMPANY_LIST_ID = '901523533861';
+const TEAM = [
+  { id: 60682280, name: 'יואב' }, { id: 94556915, name: 'איתמר' }, { id: 94589634, name: 'שרון' },
+  { id: 94556216, name: 'נועה' }, { id: 88703216, name: 'אלית' }, { id: 106507992, name: 'עדי' },
+  { id: 94556277, name: 'ראובן' }, { id: 94556360, name: 'יונתן' }, { id: 94556229, name: 'עודי' },
+];
+const CATS = {
+  'הכנסות': { color: 'var(--cat-revenue)' }, 'מוצר': { color: 'var(--cat-product)' },
+  'אנשים': { color: 'var(--cat-people)' }, 'תפעול': { color: 'var(--cat-ops)' }, 'לקוחות': { color: 'var(--cat-clients)' },
+};
+const CAT_ORDER = ['הכנסות', 'מוצר', 'אנשים', 'תפעול', 'לקוחות'];
+const STATUS = {
+  planning:   { he: 'תכנון',  color: 'var(--st-plan)' },
+  'on-track': { he: 'פעיל',   color: 'var(--st-active)' },
+  blocked:    { he: 'חסום',   color: 'var(--st-block)' },
+  done:       { he: 'הושלם',  color: 'var(--st-done)' },
+};
+const AV_HUES = ['25','250','300','160','60','200','350','130','90','320'];
+
+// ─── State ───────────────────────────────────────────────
+let PROJECTS = [];
+let STATS = {};          // listId -> { open, total, progress, nextDate, team:[] }
+let filter = 'all';
+let view = 'grid';
+let search = '';
+let active = null;       // current open project
+let curTab = 'tasks';
+
+// ─── Helpers ─────────────────────────────────────────────
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+function initials(name) { const p = String(name || '').trim().split(/\s+/); return ((p[0]?.[0] || '') + (p[1]?.[0] || '')).trim() || '?'; }
+function hueFor(name) { let h = 0; for (const c of String(name || '')) h = (h + c.charCodeAt(0)) % AV_HUES.length; return AV_HUES[h]; }
+function avatar(name, cls) { const n = esc(name); return `<div class="avatar ${cls||''}" title="${n}" style="background:oklch(0.58 0.13 ${hueFor(name)})">${esc(initials(name))}</div>`; }
+function fmtDate(iso) { if (!iso) return '—'; const p = String(iso).split('-'); return p.length === 3 ? `${p[2]}.${p[1]}.${p[0].slice(2)}` : iso; }
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function thisMonthPrefix() { return new Date().toISOString().slice(0, 7); }
+
+// ─── Init ────────────────────────────────────────────────
+document.getElementById('page-date').textContent = new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+tickClock(); setInterval(tickClock, 10000);
+function tickClock() { document.getElementById('sync-time').textContent = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }); }
+document.addEventListener('DOMContentLoaded', loadAll);
+
+async function loadAll() {
+  try {
+    const r = await fetch('/api/lists');
+    const data = await r.json();
+    const lists = data.lists || [];
+    PROJECTS = lists.map(l => ({
+      id: l.id, listId: l.id, name: cleanName(l.name), rawName: l.name,
+      goal: l.goal || '', dim: l.dim || '', priority: l.priority || '',
+      ownerId: l.ownerId || '', ownerName: l.ownerName || '', status: l.status || 'planning',
+      startDate: l.startDate || '', dueDate: l.dueDate || '', updateDue: l.updateDue || '',
+      isCompany: l.id === COMPANY_LIST_ID, rawContent: l.rawContent || '',
+    }));
+    renderAll();
+    PROJECTS.forEach(p => fetchStats(p.listId));
+  } catch (e) {
+    document.getElementById('projects-grid').innerHTML = '<div class="msg-err">שגיאה בטעינה מ-ClickUp. ודא שטוקן ה-ClickUp מוגדר ב-Vercel.</div>';
+  }
+}
+function cleanName(n) { return String(n || '').replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]\s*/u, '').trim(); }
+
+async function fetchStats(listId) {
+  try {
+    const r = await fetch('/api/tasks?listId=' + encodeURIComponent(listId));
+    const tasks = (await r.json()).tasks || [];
+    const team = new Set();
+    let done = 0; let nextDate = null;
+    tasks.forEach(t => {
+      const s = t.status?.status || 'to do';
+      if (s === 'complete' || s === 'closed') done++;
+      (t.assignees || []).forEach(a => team.add(a.username || a.email));
+      if (t.due_date && !(s === 'complete' || s === 'closed')) { const d = parseInt(t.due_date); if (!nextDate || d < nextDate) nextDate = d; }
+    });
+    STATS[listId] = {
+      total: tasks.length, open: tasks.length - done,
+      progress: tasks.length ? Math.round((done / tasks.length) * 100) : 0,
+      nextDate: nextDate ? new Date(nextDate).toISOString().slice(0, 10) : '',
+      team: [...team],
+    };
+    renderAll();
+    if (active && active.listId === listId) renderPanelStats();
+  } catch (e) { /* ignore per-list stat errors */ }
+}
+
+// ─── Render ──────────────────────────────────────────────
+function renderAll() { renderOverview(); renderFilters(); renderHero(); renderGrid(); }
+
+function renderOverview() {
+  const strategic = PROJECTS.filter(p => !p.isCompany);
+  const activeCount = strategic.filter(p => p.status === 'on-track').length;
+  const totalOpen = PROJECTS.reduce((s, p) => s + (STATS[p.listId]?.open || 0), 0);
+  const dueThisMonth = PROJECTS.filter(p => (STATS[p.listId]?.nextDate || p.dueDate || '').startsWith(thisMonthPrefix())).length;
+  document.getElementById('overview').innerHTML = `
+    <div class="stat"><div class="stat-num">${activeCount}<small> / ${strategic.length}</small></div><div class="stat-label"><span class="stat-dot" style="background:var(--st-active)"></span>פרויקטים פעילים</div></div>
+    <div class="stat"><div class="stat-num">${totalOpen}</div><div class="stat-label"><span class="stat-dot" style="background:var(--accent)"></span>משימות פתוחות</div></div>
+    <div class="stat"><div class="stat-num">${dueThisMonth}</div><div class="stat-label"><span class="stat-dot" style="background:var(--cat-clients)"></span>יעדים החודש</div></div>`;
+}
+
+function renderFilters() {
+  const strategic = PROJECTS.filter(p => !p.isCompany);
+  const count = (k) => k === 'all' ? strategic.length : strategic.filter(p => p.dim === k).length;
+  let html = `<button class="chip ${filter==='all'?'active':''}" onclick="setFilter('all')">הכל<span class="count">${count('all')}</span></button>`;
+  html += CAT_ORDER.map(k => `<button class="chip ${filter===k?'active':''}" onclick="setFilter('${k}')"><span class="dot" style="background:${CATS[k].color}"></span>${k}<span class="count">${count(k)}</span></button>`).join('');
+  html += `<div class="filters-spacer"></div>
+    <div class="view-toggle">
+      <button class="${view==='grid'?'on':''}" onclick="setView('grid')" aria-label="רשת"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></button>
+      <button class="${view==='list'?'on':''}" onclick="setView('list')" aria-label="רשימה"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="5" rx="2"/><rect x="3" y="15" width="18" height="5" rx="2"/></svg></button>
+    </div>`;
+  document.getElementById('filters').innerHTML = html;
+}
+function setFilter(f) { filter = f; renderFilters(); renderHero(); renderGrid(); }
+function setView(v) { view = v; renderFilters(); renderGrid(); }
+function onSearch(v) { search = v.trim(); renderGrid(); }
+
+function renderHero() {
+  const c = PROJECTS.find(p => p.isCompany);
+  const sec = document.getElementById('hero-section');
+  if (!c || filter !== 'all') { sec.innerHTML = ''; return; }
+  const st = STATS[c.listId] || {};
+  const team = (st.team && st.team.length) ? st.team : TEAM.slice(0, 6).map(m => m.name);
+  const avatarsHtml = team.slice(0, 5).map(n => avatar(n)).join('') + (team.length > 5 ? `<div class="avatar more">+${team.length - 5}</div>` : '');
+  sec.innerHTML = `
+    <article class="hero" onclick="openDrawer('${c.listId}')">
+      <button class="edit-btn" onclick="event.stopPropagation();openEdit('${c.listId}')">✏ ערוך</button>
+      <div>
+        <div class="hero-eyebrow"><span class="ring"></span>פרויקט חברה · משותף לכל ההנהלה</div>
+        <h2 class="hero-title">${esc(c.name)}</h2>
+        <p class="hero-desc">${esc(c.goal || c.rawContent || 'מרחב העבודה המשותף לכל ההנהלה — יעדים רוחביים, החלטות מפתח ומשימות שנוגעות לכלל החברה.')}</p>
+        <div class="prog-wrap" style="max-width:360px;margin-bottom:22px;">
+          <div class="prog-label"><span>התקדמות כוללת</span><b>${st.progress || 0}%</b></div>
+          <div class="progress"><i style="width:${st.progress || 0}%"></i></div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="event.stopPropagation();openDrawer('${c.listId}')">פתיחת פרטים ומשימות
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></button>
+          <button class="btn-ghost" onclick="event.stopPropagation();openDrawer('${c.listId}','updates')">שיתוף עדכון</button>
+        </div>
+      </div>
+      <div class="hero-aside">
+        <div class="hero-metric-row"><span class="k">צוות מוביל</span><div class="avatars">${avatarsHtml}</div></div>
+        <div class="hero-metric-row"><span class="k">משימות פתוחות</span><span class="v">${st.open || 0}</span></div>
+        <div class="hero-metric-row"><span class="k">סטטוס</span><span class="v">${STATUS[c.status]?.he || '—'}</span></div>
+        <div class="hero-metric-row"><span class="k">יעד קרוב</span><span class="v">${fmtDate(st.nextDate || c.dueDate)}</span></div>
+      </div>
+    </article>`;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('projects-grid');
+  let list = PROJECTS.filter(p => !p.isCompany);
+  if (filter !== 'all') list = list.filter(p => p.dim === filter);
+  if (search) list = list.filter(p => (p.name + ' ' + p.goal).toLowerCase().includes(search.toLowerCase()));
+  document.getElementById('strategic-count').textContent = list.length;
+  grid.className = 'grid' + (view === 'list' ? ' list' : '');
+  if (!list.length) { grid.innerHTML = '<div class="empty-state"><div class="ico">📁</div><b>אין פרויקטים</b>לא נמצאו פרויקטים בקטגוריה זו.</div>'; return; }
+  grid.innerHTML = list.map(p => {
+    const st = STATS[p.listId] || {};
+    const cat = CATS[p.dim]; const status = STATUS[p.status] || STATUS.planning;
+    const nextDate = st.nextDate || p.dueDate;
+    const isLate = nextDate && nextDate < todayISO();
+    return `
+    <article class="card" onclick="openDrawer('${p.listId}')">
+      ${cat ? `<span class="card-cat-bar" style="background:${cat.color}"></span>` : ''}
+      <button class="edit-btn" onclick="event.stopPropagation();openEdit('${p.listId}')">✏ ערוך</button>
+      <div class="card-top">
+        <span class="cat-tag">${cat ? `<span class="dot" style="background:${cat.color}"></span>${esc(p.dim)}` : '<span style="color:var(--faint)">ללא קטגוריה</span>'}</span>
+        <span class="status"><span class="dot" style="background:${status.color}"></span>${status.he}</span>
+      </div>
+      <div>
+        <h3 class="card-title">${esc(p.name)}</h3>
+        ${p.goal ? `<div class="card-goal" style="margin-top:8px">${esc(p.goal)}</div>` : ''}
+        <div class="card-meta-row">${p.ownerName ? `<span class="card-owner">${avatar(p.ownerName)}${esc(p.ownerName)}</span>` : '<span style="color:var(--faint)">ללא אחראי</span>'}</div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>התקדמות</span><b>${st.progress != null ? st.progress + '%' : '…'}</b></div>
+        <div class="progress"><i style="width:${st.progress || 0}%"></i></div>
+      </div>
+      <div class="card-foot">
+        <span class="foot-item ${isLate ? 'warn' : ''}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          ${fmtDate(nextDate)}${isLate ? ' ⚠' : ''}</span>
+        <span class="tasks-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+          ${st.open > 0 ? st.open + ' משימות פתוחות' : (st.total === 0 ? 'אין משימות' : 'אין פתוחות')}</span>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+// ─── Drawer ──────────────────────────────────────────────
+function openDrawer(listId, tab) {
+  active = PROJECTS.find(p => p.listId === listId);
+  if (!active) return;
+  curTab = tab || 'tasks';
+  document.getElementById('scrim').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+  renderPanelShell();
+  if (curTab === 'updates') renderUpdates(); else renderTasks();
+}
+function closeDrawer() {
+  document.getElementById('scrim').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+  active = null;
+}
+function renderPanelShell() {
+  const p = active; const cat = CATS[p.dim]; const status = STATUS[p.status] || STATUS.planning;
+  document.getElementById('panel').innerHTML = `
+    <div class="panel-head">
+      <div class="panel-top">
+        <div>
+          <div class="panel-cat">${cat ? `<span class="dot" style="background:${cat.color}"></span>${esc(p.dim)}<span style="color:var(--faint)">·</span>` : ''}<span class="status" style="padding:3px 9px"><span class="dot" style="background:${status.color}"></span>${status.he}</span></div>
+          <h2 class="panel-title">${esc(p.name)}</h2>
+          ${p.goal ? `<p class="panel-sub">${esc(p.goal)}</p>` : ''}
+        </div>
+        <button class="panel-close" onclick="closeDrawer()">✕</button>
+      </div>
+      <div class="panel-stats" id="panel-stats"></div>
+      <div class="tabs">
+        <button class="tab ${curTab==='tasks'?'on':''}" id="ptab-tasks" onclick="switchTab('tasks')">משימות<span class="badge" id="badge-tasks"></span></button>
+        <button class="tab ${curTab==='updates'?'on':''}" id="ptab-updates" onclick="switchTab('updates')">עדכונים<span class="badge" id="badge-updates"></span></button>
+      </div>
+    </div>
+    <div class="panel-body" id="panel-body"><div class="loading">טוען…</div></div>`;
+  renderPanelStats();
+}
+function renderPanelStats() {
+  if (!active) return;
+  const el = document.getElementById('panel-stats'); if (!el) return;
+  const st = STATS[active.listId] || {};
+  el.innerHTML = `
+    <div class="panel-stat"><div class="v">${st.progress != null ? st.progress + '%' : '…'}</div><div class="k">התקדמות</div></div>
+    <div class="panel-stat"><div class="v">${st.open != null ? st.open : '…'}</div><div class="k">משימות פתוחות</div></div>
+    <div class="panel-stat"><div class="v">${fmtDate(st.nextDate || active.dueDate)}</div><div class="k">יעד הבא</div></div>
+    ${active.ownerName ? `<div class="panel-stat"><div class="v">${avatar(active.ownerName)}</div><div class="k">${esc(active.ownerName)}</div></div>` : ''}`;
+}
+function switchTab(tab) {
+  curTab = tab;
+  document.getElementById('ptab-tasks').classList.toggle('on', tab === 'tasks');
+  document.getElementById('ptab-updates').classList.toggle('on', tab === 'updates');
+  if (tab === 'tasks') renderTasks(); else renderUpdates();
+}
+
+// ─── Tasks ───────────────────────────────────────────────
+async function renderTasks() {
+  const listId = active.listId;
+  const body = document.getElementById('panel-body');
+  body.innerHTML = '<div class="loading">טוען משימות…</div>';
+  try {
+    const r = await fetch('/api/tasks?listId=' + encodeURIComponent(listId));
+    const tasks = (await r.json()).tasks || [];
+    const badge = document.getElementById('badge-tasks'); if (badge) badge.textContent = tasks.length;
+    let html = '';
+    if (!tasks.length) {
+      html = `<div class="empty-state"><div class="ico">📋</div><b>עוד אין משימות</b>הפרויקט בשלבי תכנון — הוסיפו את המשימה הראשונה.</div>`;
+    } else {
+      html = tasks.map(t => {
+        const s = t.status?.status || 'to do';
+        const isDone = s === 'complete' || s === 'closed';
+        const cls = isDone ? 'done' : s === 'in progress' ? 'wip' : s === 'blocked' ? 'block' : '';
+        const icon = isDone ? '✓' : s === 'in progress' ? '→' : s === 'blocked' ? '✕' : '';
+        const owner = t.assignees?.[0];
+        const due = t.due_date ? new Date(parseInt(t.due_date)).toLocaleDateString('he-IL') : '';
+        const isLate = t.due_date && parseInt(t.due_date) < Date.now() && !isDone;
+        const gm = (t.description || '').match(/📌 מטרה: (.+)/);
+        return `
+        <div class="task ${isDone ? 'done' : ''}">
+          <div class="checkbox ${cls}">${icon}</div>
+          <div class="task-main">
+            <div class="task-text">${esc(t.name)}</div>
+            <div class="task-meta">
+              ${owner ? avatar(owner.username || owner.email) + `<span>${esc(owner.username || owner.email)}</span>` : ''}
+              ${gm ? `<span class="task-tag">📌 ${esc(gm[1])}</span>` : ''}
+              ${due ? `<span class="task-tag ${isLate ? 'late' : ''}">📅 ${due}${isLate ? ' ⚠' : ''}</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    const ownerOpts = TEAM.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+    const teamCbs = TEAM.map(m => `<div class="team-cb"><input type="checkbox" id="cb_${m.id}" value="${m.id}"><label for="cb_${m.id}">${m.name}</label></div>`).join('');
+    const dimOpts = CAT_ORDER.map(d => `<option value="${d}">${d}</option>`).join('');
+    html += `
+      <div class="add-toggle" onclick="toggleTaskForm()"><span style="font-size:18px;line-height:1;font-weight:300">+</span> הוסף משימה</div>
+      <div class="task-form" id="task-form">
+        <div class="form-row"><div class="form-field"><label>שם המשימה *</label><input class="form-input" id="tf-name" placeholder="תיאור המשימה…" /></div></div>
+        <div class="form-row"><div class="form-field"><label>מטרה</label><input class="form-input" id="tf-goal" placeholder="מה המשימה אמורה להשיג?" /></div></div>
+        <div class="form-row cols2">
+          <div class="form-field"><label>קטגוריה</label><select class="form-select" id="tf-dim"><option value="">— בחר —</option>${dimOpts}</select></div>
+          <div class="form-field"><label>סטטוס</label><select class="form-select" id="tf-status"><option value="to do">לביצוע</option><option value="in progress">בתהליך</option><option value="blocked">חסום</option><option value="complete">הושלם</option></select></div>
+        </div>
+        <div class="form-row cols2">
+          <div class="form-field"><label>אחריות</label><select class="form-select" id="tf-owner"><option value="">— בחר —</option>${ownerOpts}</select></div>
+          <div class="form-field"><label>יחד עם</label><div class="team-cbs">${teamCbs}</div></div>
+        </div>
+        <div class="form-row cols3">
+          <div class="form-field"><label>התחלה</label><input class="form-input" id="tf-start" type="date" /></div>
+          <div class="form-field"><label>יעד סיום</label><input class="form-input" id="tf-due" type="date" /></div>
+          <div class="form-field"><label>מועד עדכון</label><input class="form-input" id="tf-update" type="date" /></div>
+        </div>
+        <div class="form-actions"><button class="btn-ghost" onclick="toggleTaskForm()">ביטול</button><button class="btn-primary" id="tf-submit" onclick="addTask()">הוסף ל-ClickUp</button></div>
+        <div id="task-msg"></div>
+      </div>`;
+    body.innerHTML = html;
+  } catch (e) { body.innerHTML = '<div class="msg-err">שגיאה בטעינת משימות</div>'; }
+}
+function toggleTaskForm() { document.getElementById('task-form')?.classList.toggle('open'); }
+
+async function addTask() {
+  const name = document.getElementById('tf-name').value.trim();
+  const msg = document.getElementById('task-msg'); const btn = document.getElementById('tf-submit');
+  if (!name) { document.getElementById('tf-name').focus(); return; }
+  btn.disabled = true; btn.textContent = 'שולח…'; msg.innerHTML = '';
+  const teamIds = [...document.querySelectorAll('.team-cb input:checked')].map(cb => Number(cb.value));
+  try {
+    const r = await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      listId: active.listId, name,
+      goal: document.getElementById('tf-goal').value.trim(),
+      dim: document.getElementById('tf-dim').value,
+      ownerId: Number(document.getElementById('tf-owner').value) || null,
+      teamIds,
+      startDate: document.getElementById('tf-start').value,
+      dueDate: document.getElementById('tf-due').value,
+      updateDue: document.getElementById('tf-update').value,
+      status: document.getElementById('tf-status').value,
+    }) });
+    const task = await r.json();
+    if (task.id) {
+      const linked = task.linkedLists ? ` · מוצמד ל-${task.linkedLists} רשימות אישיות` : '';
+      msg.innerHTML = `<div class="msg-ok">✓ נוצר ב-ClickUp + תויג "הנהלה"${linked}</div>`;
+      fetchStats(active.listId);
+      setTimeout(renderTasks, 1100);
+    } else { throw new Error(task.error || JSON.stringify(task)); }
+  } catch (e) { msg.innerHTML = `<div class="msg-err">שגיאה: ${esc(e.message)}</div>`; btn.disabled = false; btn.textContent = 'הוסף ל-ClickUp'; }
+}
+
+// ─── Updates ─────────────────────────────────────────────
+async function renderUpdates() {
+  const listId = active.listId;
+  const body = document.getElementById('panel-body');
+  body.innerHTML = '<div class="loading">טוען עדכונים…</div>';
+  try {
+    const r = await fetch('/api/comments?listId=' + encodeURIComponent(listId));
+    const comments = (await r.json()).comments || [];
+    const badge = document.getElementById('badge-updates'); if (badge) badge.textContent = comments.length;
+    const typeMap = { '🔴': { cls: 'block', label: 'חסימה' }, '✅': { cls: 'good', label: 'התקדמות' }, '🔄': { cls: 'status', label: 'עדכון סטטוס' }, '📋': { cls: '', label: 'עדכון' } };
+    let feed = '';
+    if (!comments.length) {
+      feed = `<div class="empty-state"><div class="ico">💬</div><b>אין עדכונים עדיין</b>שתפו את העדכון הראשון על הפרויקט.</div>`;
+    } else {
+      feed = comments.map((c, i) => {
+        const text = c.comment_text || '';
+        const t = typeMap[text[0]] || { cls: '', label: 'עדכון' };
+        let clean = text.replace(/^[🔴✅🔄📋]\s*/, '');
+        const am = clean.match(/^\[(.+?)\]/);
+        const author = am ? am[1] : (c.user?.username || 'הנהלה');
+        const display = am ? clean.replace(/^\[.+?\]\n?/, '') : clean;
+        const time = c.date ? new Date(parseInt(c.date)).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+        const last = i === comments.length - 1;
+        return `
+        <div class="update">
+          <div class="update-line">${avatar(author)}${!last ? '<div class="stem"></div>' : ''}</div>
+          <div class="update-body">
+            <span class="who">${esc(author)}</span><span class="when">${esc(t.label)} · ${time}</span>
+            <div class="update-bubble ${t.cls}">${esc(display)}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    body.innerHTML = `
+      <div class="update-box">
+        <input class="form-input" id="up-author" placeholder="השם שלך…" style="max-width:200px" />
+        <textarea id="up-text" placeholder="כתוב עדכון, חסימה או התקדמות…"></textarea>
+        <div class="update-actions">
+          <select class="form-select" id="up-type" style="max-width:180px">
+            <option value="general">📋 עדכון כללי</option><option value="block">🔴 חסימה</option>
+            <option value="good">✅ התקדמות</option><option value="status">🔄 שינוי סטטוס</option>
+          </select>
+          <button class="btn-primary" id="up-submit" onclick="postUpdate()">פרסם</button>
+        </div>
+        <div id="up-msg"></div>
+      </div>${feed}`;
+  } catch (e) { body.innerHTML = '<div class="msg-err">שגיאה בטעינת עדכונים</div>'; }
+}
+async function postUpdate() {
+  const text = document.getElementById('up-text').value.trim();
+  const msg = document.getElementById('up-msg'); const btn = document.getElementById('up-submit');
+  if (!text) { document.getElementById('up-text').focus(); return; }
+  btn.disabled = true; btn.textContent = 'שולח…'; msg.innerHTML = '';
+  try {
+    const r = await fetch('/api/comments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+      listId: active.listId, text, authorName: document.getElementById('up-author').value.trim() || 'הנהלה', type: document.getElementById('up-type').value,
+    }) });
+    const data = await r.json();
+    if (data.id) { msg.innerHTML = '<div class="msg-ok">✓ עדכון נשלח ל-ClickUp</div>'; document.getElementById('up-text').value = ''; setTimeout(renderUpdates, 900); }
+    else throw new Error(data.error || 'שגיאה');
+  } catch (e) { msg.innerHTML = `<div class="msg-err">שגיאה: ${esc(e.message)}</div>`; btn.disabled = false; btn.textContent = 'פרסם'; }
+}
+
+// ─── Edit modal ──────────────────────────────────────────
+function openEdit(listId) {
+  const p = PROJECTS.find(x => x.listId === listId); if (!p) return;
+  document.getElementById('m-dim').innerHTML = '<option value="">— בחר —</option>' + CAT_ORDER.map(d => `<option value="${d}" ${p.dim===d?'selected':''}>${d}</option>`).join('');
+  document.getElementById('m-owner').innerHTML = '<option value="">— בחר —</option>' + TEAM.map(m => `<option value="${m.id}" data-name="${m.name}" ${String(p.ownerId)===String(m.id)?'selected':''}>${m.name}</option>`).join('');
+  document.getElementById('modal-name').textContent = 'ערוך: ' + p.name;
+  document.getElementById('m-listid').value = p.listId;
+  document.getElementById('m-goal').value = p.goal || '';
+  document.getElementById('m-priority').value = p.priority || '';
+  document.getElementById('m-status').value = p.status || 'planning';
+  document.getElementById('m-start').value = p.startDate || '';
+  document.getElementById('m-due').value = p.dueDate || '';
+  document.getElementById('m-update').value = p.updateDue || '';
+  document.getElementById('modal-msg').innerHTML = '';
+  const btn = document.getElementById('modal-save'); btn.disabled = false; btn.textContent = 'שמור ב-ClickUp';
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal(e) { if (e && e.target !== document.getElementById('modal-bg')) return; document.getElementById('modal-bg').classList.remove('open'); }
+async function saveProjectMeta() {
+  const listId = document.getElementById('m-listid').value;
+  const btn = document.getElementById('modal-save'); const msg = document.getElementById('modal-msg');
+  const ownerSel = document.getElementById('m-owner'); const ownerOpt = ownerSel.selectedOptions[0];
+  btn.disabled = true; btn.textContent = 'שומר…'; msg.innerHTML = '';
+  const payload = {
+    listId, goal: document.getElementById('m-goal').value.trim(), dim: document.getElementById('m-dim').value,
+    priority: document.getElementById('m-priority').value, ownerId: ownerSel.value, ownerName: ownerOpt?.dataset.name || '',
+    status: document.getElementById('m-status').value, startDate: document.getElementById('m-start').value,
+    dueDate: document.getElementById('m-due').value, updateDue: document.getElementById('m-update').value,
+  };
+  try {
+    const r = await fetch('/api/lists', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await r.json();
+    if (data.ok) {
+      msg.innerHTML = '<span style="color:var(--st-active)">✓ נשמר ב-ClickUp</span>';
+      const p = PROJECTS.find(x => x.listId === listId); if (p) Object.assign(p, payload);
+      renderAll();
+      setTimeout(() => { document.getElementById('modal-bg').classList.remove('open'); }, 700);
+    } else throw new Error(data.error || JSON.stringify(data));
+  } catch (e) { msg.innerHTML = `<span style="color:var(--st-block)">שגיאה: ${esc(e.message)}</span>`; btn.disabled = false; btn.textContent = 'שמור ב-ClickUp'; }
+}
+</script>
+</body>
 </html>
