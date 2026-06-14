@@ -267,6 +267,45 @@ button { cursor: pointer; }
 .modal-title { font-family: var(--ff-display); font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); align-items: center; }
 
+/* gantt */
+.gantt-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.gantt-nav { display: flex; align-items: center; gap: 8px; }
+.gantt-nav button { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); display: grid; place-items: center; color: var(--ink-soft); }
+.gantt-nav button:hover { background: var(--hover); border-color: var(--border-2); }
+.gantt-month { font-weight: 800; font-size: 18px; min-width: 150px; text-align: center; }
+.gantt-legend { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.gantt-legend .lg { display: flex; align-items: center; gap: 6px; }
+.gantt-legend .lg i { width: 10px; height: 10px; border-radius: 3px; }
+.gantt-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow-sm); }
+.gantt-table { --label: 230px; --dayw: 34px; width: max-content; min-width: 100%; background-repeat: no-repeat; }
+.grow { display: grid; grid-template-columns: var(--label) var(--track); }
+.ghead { background: var(--surface); border-bottom: 1px solid var(--border); }
+.gcorner { display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.gdays { display: flex; direction: ltr; }
+.gday { width: var(--dayw); flex: none; text-align: center; padding: 6px 0 7px; }
+.gday.we { background: #f1efe9; }
+.gday .wd { font-size: 9px; color: var(--faint); }
+.gday .dn { font-size: 11px; font-weight: 700; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.gday.today .dn { color: #fff; background: var(--accent); border-radius: 6px; padding: 1px 5px; display: inline-block; }
+.gph { background: #faf8f4; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+.gph:first-of-type { border-top: none; }
+.gph-label { display: flex; align-items: center; gap: 8px; justify-content: flex-end; padding: 9px 14px; font-weight: 700; font-size: 14px; }
+.gph-label .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.gph-track { background: #faf8f4; }
+.gtr { border-bottom: 1px solid var(--border); }
+.gtr-label { display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; font-size: 13px; color: var(--ink); text-align: right; min-height: 50px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gtrack { position: relative; direction: ltr; min-height: 50px; background-image: repeating-linear-gradient(to right, var(--border) 0 1px, transparent 1px var(--dayw)); }
+.gbar { position: absolute; top: 12px; height: 26px; border-radius: 9px; display: flex; align-items: center; padding-inline: 5px; box-shadow: var(--shadow-sm); cursor: default; overflow: hidden; }
+.gbar.gdone { opacity: .58; }
+.gbar.clipStart { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.gbar.clipEnd { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.gbar .gname { font-size: 11.5px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-inline-start: 6px; }
+.gbar .gav { display: flex; flex: none; }
+.gbar .gav .avatar { width: 22px; height: 22px; font-size: 10px; border: 2px solid #fff; margin-inline-start: -8px; box-shadow: none; }
+.gbar .gav .avatar:first-child { margin-inline-start: 0; }
+.gundated { display: flex; align-items: center; justify-content: flex-end; color: var(--faint); font-size: 11.5px; font-weight: 600; padding: 7px 14px; }
+.gantt-demo { background: var(--accent-wash); color: var(--accent); border: 1px solid #3949c833; border-radius: var(--radius-sm); padding: 9px 14px; font-size: 12.5px; font-weight: 600; margin-bottom: 12px; text-align: center; }
+
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; gap: 24px; }
   .hero-aside { border-inline-start: none; border-top: 1px solid var(--border); padding-inline-start: 0; padding-top: 22px; }
@@ -372,11 +411,13 @@ const AV_HUES = ['25','250','300','160','60','200','350','130','90','320'];
 // ─── State ───────────────────────────────────────────────
 let PROJECTS = [];
 let STATS = {};          // listId -> { open, total, progress, nextDate, team:[] }
+let TASKS = {};          // listId -> raw ClickUp tasks (for the Gantt)
 let filter = 'all';
 let view = 'grid';
 let search = '';
 let active = null;       // current open project
 let curTab = 'tasks';
+const _gnow = new Date(); let ganttY = _gnow.getFullYear(), ganttM = _gnow.getMonth();
 
 // ─── Helpers ─────────────────────────────────────────────
 const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -425,6 +466,7 @@ async function fetchStats(listId) {
       (t.assignees || []).forEach(a => team.add(a.username || a.email));
       if (t.due_date && !(s === 'complete' || s === 'closed')) { const d = parseInt(t.due_date); if (!nextDate || d < nextDate) nextDate = d; }
     });
+    TASKS[listId] = tasks;
     STATS[listId] = {
       total: tasks.length, open: tasks.length - done,
       progress: tasks.length ? Math.round((done / tasks.length) * 100) : 0,
@@ -459,6 +501,7 @@ function renderFilters() {
     <div class="view-toggle">
       <button class="${view==='grid'?'on':''}" onclick="setView('grid')" aria-label="רשת"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></button>
       <button class="${view==='list'?'on':''}" onclick="setView('list')" aria-label="רשימה"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="5" rx="2"/><rect x="3" y="15" width="18" height="5" rx="2"/></svg></button>
+      <button class="${view==='gantt'?'on':''}" onclick="setView('gantt')" aria-label="גאנט"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="11" height="4" rx="2"/><rect x="8" y="10" width="13" height="4" rx="2"/><rect x="3" y="16" width="9" height="4" rx="2"/></svg></button>
     </div>`;
   document.getElementById('filters').innerHTML = html;
 }
@@ -501,6 +544,7 @@ function renderHero() {
 
 function renderGrid() {
   const grid = document.getElementById('projects-grid');
+  if (view === 'gantt') { renderGantt(grid); return; }
   let list = PROJECTS.filter(p => !p.isCompany);
   if (filter !== 'all') list = list.filter(p => p.dim === filter);
   if (search) list = list.filter(p => (p.name + ' ' + p.goal).toLowerCase().includes(search.toLowerCase()));
@@ -539,6 +583,143 @@ function renderGrid() {
       </div>
     </article>`;
   }).join('');
+}
+
+// ─── Gantt (monthly, grouped by project) ─────────────────
+function shiftMonth(delta) {
+  ganttM += delta;
+  if (ganttM < 0) { ganttM = 11; ganttY--; }
+  if (ganttM > 11) { ganttM = 0; ganttY++; }
+  renderGrid();
+}
+function isWeekend(d) { const wd = new Date(ganttY, ganttM, d).getDay(); return wd === 5 || wd === 6; } // Fri/Sat
+function taskGeom(t, N) {
+  const ms = (v) => v ? new Date(parseInt(v)) : null;
+  let s = ms(t.start_date) || ms(t.due_date);
+  let e = ms(t.due_date) || ms(t.start_date);
+  if (!s || !e) return null;
+  if (s > e) { const tmp = s; s = e; e = tmp; }
+  const mS = new Date(ganttY, ganttM, 1, 0, 0, 0), mE = new Date(ganttY, ganttM, N, 23, 59, 59);
+  if (e < mS || s > mE) return null;
+  const clipS = s < mS, clipE = e > mE;
+  const sIdx = clipS ? 0 : s.getDate() - 1;
+  const eIdx = clipE ? N - 1 : e.getDate() - 1;
+  return { sIdx, eIdx, span: eIdx - sIdx + 1, clipS, clipE };
+}
+function ganttAvatars(t) {
+  const names = (t.assignees || []).map(a => a.username || a.email);
+  if (!names.length) return '';
+  return `<div class="gav">${names.slice(0, 4).map(n => avatar(n)).join('')}${names.length > 4 ? `<div class="avatar more" style="background:var(--surface-2);color:var(--muted)">+${names.length - 4}</div>` : ''}</div>`;
+}
+
+function renderGantt(grid) {
+  grid.className = '';
+  let list = PROJECTS.filter(p => !p.isCompany);
+  if (filter !== 'all') list = list.filter(p => p.dim === filter);
+  const company = PROJECTS.find(p => p.isCompany);
+  if (filter === 'all' && company) list = [company, ...list];
+  if (search) list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+  document.getElementById('strategic-count').textContent = list.length;
+
+  const N = new Date(ganttY, ganttM + 1, 0).getDate();
+  const monthLabel = new Date(ganttY, ganttM, 1).toLocaleDateString('he-IL', { month: 'long', year: 'numeric' });
+  const tnow = new Date();
+  const todayD = (tnow.getFullYear() === ganttY && tnow.getMonth() === ganttM) ? tnow.getDate() : -1;
+  const WD = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
+
+  // weekend shading background (hard-edged bands)
+  const weParts = [];
+  for (let i = 0; i < N; i++) {
+    const col = isWeekend(i + 1) ? '#f4f2ec' : 'transparent';
+    weParts.push(`${col} calc(var(--dayw)*${i})`, `${col} calc(var(--dayw)*${i + 1})`);
+  }
+  const weGrad = `linear-gradient(to right, ${weParts.join(',')})`;
+
+  // day header
+  let days = '';
+  for (let d = 1; d <= N; d++) {
+    days += `<div class="gday${isWeekend(d) ? ' we' : ''}${d === todayD ? ' today' : ''}"><div class="wd">${WD[new Date(ganttY, ganttM, d).getDay()]}</div><div class="dn">${d}</div></div>`;
+  }
+
+  // Demo fallback: if there are genuinely no tasks anywhere yet, show a clearly
+  // labelled sample so the view isn't blank. Real ClickUp tasks replace it automatically.
+  const allLoaded = list.every(p => TASKS[p.listId] !== undefined);
+  const realTotal = list.reduce((s, p) => s + ((TASKS[p.listId] || []).length), 0);
+  const demo = allLoaded && realTotal === 0;
+  const dDay = (d) => String(new Date(ganttY, ganttM, Math.max(1, Math.min(N, d)), 12, 0, 0).getTime());
+  const DEMO = {
+    'שיווק': [['קמפיין רימרקטינג', 'יואב', ['נועה'], 2, 9], ['אופטימיזציית דפי נחיתה', 'נועה', ['עדי'], 10, 18], ['דוח ביצועים להנהלה', 'יואב', ['ראובן'], 20, 24]],
+    'עמלות': [['הגדרת מדרגות תגמול', 'עודי', ['ראובן'], 3, 12], ['אישור משפטי למודל', 'ראובן', ['עודי'], 14, 22]],
+    'Bestie': [['שיפור דיוק תשובות', 'איתמר', ['שרון'], 1, 11], ['מסך הגדרות למנהל', 'שרון', ['איתמר', 'עדי'], 12, 20], ['השקה לצוות פיילוט', 'איתמר', ['נועה'], 22, 28]],
+    'Agent': [['אפיון מסכי הליבה', 'עדי', ['איתמר'], 5, 15], ['הגדרת תקציב פיתוח', 'עודי', [], 16, 23]],
+    'CRM': [['איסוף דרישות מהמחלקות', 'שרון', ['אלית', 'יונתן'], 8, 20], ['בחירת ספק והטמעה', 'אלית', ['שרון'], 21, 28]],
+    'חברה': [['סקירת רבעון Q3', 'יואב', ['איתמר', 'נועה'], 6, 14], ['מצגת דירקטוריון', 'נועה', ['יואב'], 18, 25]],
+  };
+  const demoFor = (name) => {
+    const key = Object.keys(DEMO).find(k => name.includes(k));
+    const tpl = key ? DEMO[key] : [['משימת דוגמה', 'יואב', ['איתמר'], 5, 15]];
+    return tpl.map(([n, o, c, s, e]) => ({ name: n, start_date: dDay(s), due_date: dDay(e), status: { status: 'in progress' }, assignees: [{ username: o }, ...c.map(x => ({ username: x }))] }));
+  };
+
+  // rows
+  let rows = '';
+  for (const p of list) {
+    const cat = CATS[p.dim];
+    const col = cat ? cat.color : 'var(--accent)';
+    const tasks = demo ? demoFor(p.name) : (TASKS[p.listId] || []);
+    const bars = [];
+    let undated = 0;
+    for (const t of tasks) {
+      if (!t.start_date && !t.due_date) { undated++; continue; }
+      const g = taskGeom(t, N);
+      if (!g) continue;
+      const done = (t.status?.status === 'complete' || t.status?.status === 'closed');
+      bars.push(
+        `<div class="gtr">
+          <div class="gtr-label" title="${esc(t.name)}">${esc(t.name)}</div>
+          <div class="gtrack">
+            <div class="gbar${g.clipS ? ' clipStart' : ''}${g.clipE ? ' clipEnd' : ''}${done ? ' gdone' : ''}" style="left:calc(var(--dayw)*${g.sIdx});width:calc(var(--dayw)*${g.span});background:${col}" title="${esc(t.name)}">
+              ${ganttAvatars(t)}<span class="gname">${esc(t.name)}</span>
+            </div>
+          </div>
+        </div>`
+      );
+    }
+    const loaded = TASKS[p.listId] !== undefined;
+    let inner = bars.join('');
+    if (!bars.length) {
+      inner = `<div class="gtr"><div class="gtr-label" style="color:var(--faint)">${loaded ? (undated ? '' : 'אין משימות החודש') : 'טוען…'}</div><div class="gtrack"></div></div>`;
+    }
+    rows += `
+      <div class="grow gph">
+        <div class="gph-label"><span class="dot" style="background:${col}"></span>${esc(p.name)}${p.dim ? '' : ' '}</div>
+        <div class="gph-track"></div>
+      </div>
+      ${inner}
+      ${undated ? `<div class="grow"><div class="gundated">+ ${undated} משימות ללא תאריך (לא מוצגות בציר)</div><div class="gtrack"></div></div>` : ''}`;
+  }
+
+  const legend = Object.entries(CATS).map(([k, c]) => `<span class="lg"><i style="background:${c.color}"></i>${c.he}</span>`).join('');
+
+  grid.innerHTML = `
+    <div class="gantt-top">
+      <div class="gantt-nav">
+        <button onclick="shiftMonth(-1)" aria-label="חודש קודם"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></button>
+        <div class="gantt-month">${monthLabel}</div>
+        <button onclick="shiftMonth(1)" aria-label="חודש הבא"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg></button>
+      </div>
+      <div class="gantt-legend">${legend}</div>
+    </div>
+    ${demo ? '<div class="gantt-demo">תצוגה לדוגמה · הגאנט יתמלא אוטומטית כשתתווספנה משימות עם תאריכים ב-ClickUp</div>' : ''}
+    <div class="gantt-scroll">
+      <div class="gantt-table" style="--track:calc(var(--dayw)*${N});background-image:${weGrad}">
+        <div class="grow ghead">
+          <div class="gcorner">פרויקט / משימה</div>
+          <div class="gdays">${days}</div>
+        </div>
+        ${rows}
+      </div>
+    </div>`;
 }
 
 // ─── Drawer ──────────────────────────────────────────────
