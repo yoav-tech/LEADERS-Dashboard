@@ -430,9 +430,13 @@ function thisMonthPrefix() { return new Date().toISOString().slice(0, 7); }
 
 // ─── Init ────────────────────────────────────────────────
 document.getElementById('page-date').textContent = new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-tickClock(); setInterval(tickClock, 10000);
-function tickClock() { document.getElementById('sync-time').textContent = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }); }
+function markSync() { const el = document.getElementById('sync-time'); if (el) el.textContent = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }); }
+markSync();
 document.addEventListener('DOMContentLoaded', loadAll);
+// Live sync: refresh on an interval and whenever the tab regains focus, so tasks
+// added later — in the app or directly in ClickUp — flow into the Gantt/cards.
+setInterval(() => { if (!document.hidden) syncTasks(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncTasks(); });
 
 async function loadAll() {
   try {
@@ -447,14 +451,14 @@ async function loadAll() {
       isCompany: l.id === COMPANY_LIST_ID, rawContent: l.rawContent || '',
     }));
     renderAll();
-    PROJECTS.forEach(p => fetchStats(p.listId));
+    syncTasks();
   } catch (e) {
     document.getElementById('projects-grid').innerHTML = '<div class="msg-err">שגיאה בטעינה מ-ClickUp. ודא שטוקן ה-ClickUp מוגדר ב-Vercel.</div>';
   }
 }
 function cleanName(n) { return String(n || '').replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]\s*/u, '').trim(); }
 
-async function fetchStats(listId) {
+async function fetchStats(listId, silent) {
   try {
     const r = await fetch('/api/tasks?listId=' + encodeURIComponent(listId));
     const tasks = (await r.json()).tasks || [];
@@ -473,9 +477,27 @@ async function fetchStats(listId) {
       nextDate: nextDate ? new Date(nextDate).toISOString().slice(0, 10) : '',
       team: [...team],
     };
-    renderAll();
-    if (active && active.listId === listId) renderPanelStats();
+    if (!silent) {
+      renderAll();
+      if (active && active.listId === listId) renderPanelStats();
+    }
   } catch (e) { /* ignore per-list stat errors */ }
+}
+
+// Keep every view (Gantt + cards) in sync with ClickUp. Re-fetch all lists'
+// tasks in one batch, then render once. Used on load, on an interval, on tab
+// focus, and after in-app task changes — so tasks added later show up on their
+// own without a manual reload.
+let syncing = false;
+async function syncTasks() {
+  if (syncing || !PROJECTS.length) return;
+  syncing = true;
+  try {
+    await Promise.all(PROJECTS.map(p => fetchStats(p.listId, true)));
+    renderAll();
+    if (active) renderPanelStats();
+    markSync();
+  } finally { syncing = false; }
 }
 
 // ─── Render ──────────────────────────────────────────────
@@ -862,8 +884,7 @@ async function addTask() {
     if (task.id) {
       const linked = task.linkedLists ? ` · מוצמד ל-${task.linkedLists} רשימות אישיות` : '';
       msg.innerHTML = `<div class="msg-ok">✓ נוצר ב-ClickUp + תויג "הנהלה"${linked}</div>`;
-      fetchStats(active.listId);
-      setTimeout(renderTasks, 1100);
+      setTimeout(() => { syncTasks(); renderTasks(); }, 900);
     } else { throw new Error(task.error || JSON.stringify(task)); }
   } catch (e) { msg.innerHTML = `<div class="msg-err">שגיאה: ${esc(e.message)}</div>`; btn.disabled = false; btn.textContent = 'הוסף ל-ClickUp'; }
 }
